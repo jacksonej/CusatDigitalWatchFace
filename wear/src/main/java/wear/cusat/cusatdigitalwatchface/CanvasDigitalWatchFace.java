@@ -1,8 +1,11 @@
 package wear.cusat.cusatdigitalwatchface;
 
 import android.annotation.SuppressLint;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
@@ -25,11 +28,10 @@ public class CanvasDigitalWatchFace extends CanvasWatchFaceService {
     TextPaint timePaint,datePaint;
     long time;
     boolean isAmbientMode;
-
+    Bitmap mBackgroundBitmap;
     int id=100001;
     private  final long INTERACTIVE_UPDATE_RATE_MS = TimeUnit.SECONDS.toMillis(1);
-
-
+    private Paint mBackgroundPaint;
 
 
     @Override
@@ -63,19 +65,22 @@ public class CanvasDigitalWatchFace extends CanvasWatchFaceService {
             super.onCreate(holder);
 
             mCalendar= Calendar.getInstance();
-
+            mBackgroundPaint = new Paint();
+            mBackgroundPaint.setColor(Color.BLACK);
             timeFormat = new SimpleDateFormat("HH:mm:ss aa", Locale.getDefault());
             dateFormat = new SimpleDateFormat("EEE MMMM dd", Locale.getDefault());
+            final int backgroundResId = R.drawable.beautiful_scenery;
+            mBackgroundBitmap = BitmapFactory.decodeResource(getResources(), backgroundResId);
 
 
             timePaint = new TextPaint();
-            timePaint.setColor(Color.WHITE);
+            timePaint.setColor(Color.BLUE);
             timePaint.setAntiAlias(true);
             // timePaint.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, getResources().getDisplayMetrics()));
             timePaint.setTextSize(20);
 
             datePaint = new TextPaint();
-            datePaint.setColor(Color.WHITE);
+            datePaint.setColor(Color.BLUE);
             datePaint.setAntiAlias(true);
             // datePaint.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, getResources().getDisplayMetrics()));
             datePaint.setTextSize(15);
@@ -87,6 +92,13 @@ public class CanvasDigitalWatchFace extends CanvasWatchFaceService {
             /* get device features (burn-in, low-bit ambient) */
         }
 
+        @Override
+        public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+            super.onSurfaceChanged(holder, format, width, height);
+
+            float  mScale = ((float) width) / (float) mBackgroundBitmap.getWidth();
+            mBackgroundBitmap = Bitmap.createScaledBitmap(mBackgroundBitmap, (int) (mBackgroundBitmap.getWidth() * mScale), (int) (mBackgroundBitmap.getHeight() * mScale), true);
+        }
         @Override
         public void onTimeTick() {
             super.onTimeTick();
@@ -125,9 +137,10 @@ public class CanvasDigitalWatchFace extends CanvasWatchFaceService {
 
            if(isAmbientMode){
                 canvas.drawColor(Color.BLACK);
-
+               timePaint.setColor(Color.WHITE);
+               datePaint.setColor(Color.WHITE);
             }else{
-                canvas.drawColor(Color.parseColor("#a64dff"));
+               canvas.drawBitmap(mBackgroundBitmap, 0, 0, mBackgroundPaint);
             }
             canvas.drawText(timeText+"",timeX,timeY,timePaint);
             canvas.drawText(dateText+"",dateX,dateY,datePaint);
