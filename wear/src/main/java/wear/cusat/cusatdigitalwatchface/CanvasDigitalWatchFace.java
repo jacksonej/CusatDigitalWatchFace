@@ -1,16 +1,21 @@
 package wear.cusat.cusatdigitalwatchface;
 
+import android.annotation.SuppressLint;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.text.TextPaint;
+import android.util.Log;
 import android.view.SurfaceHolder;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class CanvasDigitalWatchFace extends CanvasWatchFaceService {
 
@@ -20,6 +25,13 @@ public class CanvasDigitalWatchFace extends CanvasWatchFaceService {
     TextPaint timePaint,datePaint;
     long time;
     boolean isAmbientMode;
+
+    int id=100001;
+    private  final long INTERACTIVE_UPDATE_RATE_MS = TimeUnit.SECONDS.toMillis(1);
+
+
+
+
     @Override
     public Engine onCreateEngine() {
         return new CanvasEngine();
@@ -27,6 +39,25 @@ public class CanvasDigitalWatchFace extends CanvasWatchFaceService {
 
 
     private class CanvasEngine extends CanvasWatchFaceService.Engine {
+
+
+        @SuppressLint("HandlerLeak")
+        private final Handler handler=new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                if (id == msg.what) {
+                    invalidate();
+                    if(shouldbeRunning()) {
+                        long timeMs = System.currentTimeMillis();
+                        long delayMs = INTERACTIVE_UPDATE_RATE_MS - (timeMs % INTERACTIVE_UPDATE_RATE_MS);
+                        Log.d("hai", "delay " + delayMs);
+                        handler.sendEmptyMessageDelayed(id, delayMs);
+                    }
+                }
+            }
+        };
+
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
@@ -67,7 +98,7 @@ public class CanvasDigitalWatchFace extends CanvasWatchFaceService {
         public void onAmbientModeChanged(boolean inAmbientMode) {
             super.onAmbientModeChanged(inAmbientMode);
             isAmbientMode=inAmbientMode;
-            /* the wearable switched between modes */
+                updateTimer();
         }
 
         @Override
@@ -108,7 +139,18 @@ public class CanvasDigitalWatchFace extends CanvasWatchFaceService {
         @Override
         public void onVisibilityChanged(boolean visible) {
             super.onVisibilityChanged(visible);
-            /* the watch face became visible or invisible */
+            updateTimer();
         }
+
+        private void updateTimer(){
+            handler.removeMessages(id);
+            if(shouldbeRunning()) {
+                handler.sendEmptyMessage(id);
+            }
+        }
+        private boolean shouldbeRunning(){
+            return  isVisible() && !isInAmbientMode();
+        }
+
     }
 }
