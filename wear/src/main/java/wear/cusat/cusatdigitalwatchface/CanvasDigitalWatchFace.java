@@ -19,6 +19,7 @@ public class CanvasDigitalWatchFace extends CanvasWatchFaceService {
     SimpleDateFormat timeFormat,dateFormat;
     TextPaint timePaint,datePaint;
     long time;
+    boolean isAmbientMode;
     @Override
     public Engine onCreateEngine() {
         return new CanvasEngine();
@@ -65,6 +66,7 @@ public class CanvasDigitalWatchFace extends CanvasWatchFaceService {
         @Override
         public void onAmbientModeChanged(boolean inAmbientMode) {
             super.onAmbientModeChanged(inAmbientMode);
+            isAmbientMode=inAmbientMode;
             /* the wearable switched between modes */
         }
 
@@ -88,16 +90,20 @@ public class CanvasDigitalWatchFace extends CanvasWatchFaceService {
             int dateX = Math.abs(bounds.centerX() - dateBounds.centerX());
             int dateY = Math.round((Math.abs(bounds.centerY())) - (bounds.height() * 0.02f));
 
+            canvas.save();
 
-
-          /*  if(isAmbientMode){
+           if(isAmbientMode){
                 canvas.drawColor(Color.BLACK);
 
             }else{
                 canvas.drawColor(Color.parseColor("#a64dff"));
-            }*/
+            }
             canvas.drawText(timeText+"",timeX,timeY,timePaint);
-            canvas.drawText(dateText+"",dateX,dateY,datePaint);        }
+            canvas.drawText(dateText+"",dateX,dateY,datePaint);
+
+
+            canvas.restore();
+        }
 
         @Override
         public void onVisibilityChanged(boolean visible) {
