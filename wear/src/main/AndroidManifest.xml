@@ -52,6 +52,28 @@
         </service>
 
 
+        <service
+            android:name="wear.cusat.cusatdigitalwatchface.NewCusatAnalogue"
+            android:label="New DDukk Analogue"
+            android:permission="android.permission.BIND_WALLPAPER">
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/watchface" />
+            <meta-data
+                android:name="com.google.android.wearable.watchface.preview"
+                android:resource="@drawable/preview_digital" />
+            <meta-data
+                android:name="com.google.android.wearable.watchface.preview_circular"
+                android:resource="@drawable/preview_digital_circular" />
+
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService" />
+
+                <category android:name="com.google.android.wearable.watchface.category.WATCH_FACE" />
+            </intent-filter>
+        </service>
+
+
     </application>
 
     <uses-feature android:name="android.hardware.type.watch" />
